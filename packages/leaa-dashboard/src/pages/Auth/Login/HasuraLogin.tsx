@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import queryString from 'query-string';
 
@@ -14,47 +14,50 @@ import { AuthLoginInput } from '@leaa/common/src/dtos/auth';
 import { DemoDataObject } from '@leaa/common/src/dtos/demo';
 import { envConfig } from '@leaa/dashboard/src/configs';
 import { HtmlMeta, SwitchLanguage, BuildInfo, AuthGithubButton } from '@leaa/dashboard/src/components';
+import { useAuth } from '@leaa/dashboard/src/libs/use-auth';
 
 import { LoginForm } from './_components/LoginForm/LoginForm';
 
 import style from './style.module.less';
 
 export default (props: IPage) => {
+  const [loading, setLoading] = useState(false);
+  const { signin } = useAuth();
   const { t } = useTranslation();
   const qs = queryString.parse(window.location.search);
 
   // ref
   const loginFormRef = useRef<ICommenFormRef<AuthLoginInput>>(null);
 
-  const setLogin = (login: any) => {
-    if (login?.name && login.flatPermissions?.length === 0) {
-      msgUtil.message(t('_page:Auth.Login.notPermissions'));
+  // const setLogin = (login: any) => {
+  //   if (login?.name && login.flatPermissions?.length === 0) {
+  //     msgUtil.message(t('_page:Auth.Login.notPermissions'));
 
-      return;
-    }
+  //     return;
+  //   }
 
-    if (login?.name && login.flatPermissions) {
-      const authInfo = {
-        id: login.id,
-        email: login.email,
-        name: login.name,
-        avatar_url: login.avatar_url,
-        flatPermissions: login.flatPermissions,
-      };
+  //   if (login?.name && login.flatPermissions) {
+  //     const authInfo = {
+  //       id: login.id,
+  //       email: login.email,
+  //       name: login.name,
+  //       avatar_url: login.avatar_url,
+  //       flatPermissions: login.flatPermissions,
+  //     };
 
-      authUtil.setAuthInfo(authInfo);
-    }
+  //     authUtil.setAuthInfo(authInfo);
+  //   }
 
-    if (login?.authToken && login.authExpiresIn) {
-      authUtil.setAuthToken(login.authToken, login.authExpiresIn);
+  //   if (login?.authToken && login.authExpiresIn) {
+  //     authUtil.setAuthToken(login.authToken, login.authExpiresIn);
 
-      if (qs.redirect) {
-        props.history.push(`${qs.redirect}`);
-      } else {
-        props.history.push(LOGIN_REDIRECT_URL);
-      }
-    }
-  };
+  //     if (qs.redirect) {
+  //       props.history.push(`${qs.redirect}`);
+  //     } else {
+  //       props.history.push(LOGIN_REDIRECT_URL);
+  //     }
+  //   }
+  // };
 
   // query
   const getDemoDataQuery = envConfig.DEMO_MODE
@@ -64,21 +67,21 @@ export default (props: IPage) => {
     : undefined;
 
   // mutation
-  const [submitLoginMutate, submitLoginMutation] = useMutation<{
-    login: IAuthInfo;
-  }>(LOGIN, {
-    // apollo-link-error onError: e => messageUtil.gqlError(e.message),
-    onCompleted({ login }) {
-      setLogin(login);
-    },
-  });
+  // const [submitLoginMutate, submitLoginMutation] = useMutation<{
+  //   login: IAuthInfo;
+  // }>(LOGIN, {
+  //   // apollo-link-error onError: e => messageUtil.gqlError(e.message),
+  //   onCompleted({ login }) {
+  //     setLogin(login);
+  //   },
+  // });
 
   const [submitLoginByTicketMutate] = useMutation<{
     loginByTicket: IAuthInfo;
   }>(LOGIN_BY_TICKET, {
     // apollo-link-error onError: e => messageUtil.gqlError(e.message),
     onCompleted({ loginByTicket }) {
-      setLogin(loginByTicket);
+      // setLogin(loginByTicket);
     },
     onError: e => {
       props.history.push('/login');
@@ -106,18 +109,28 @@ export default (props: IPage) => {
   }, [qs.ticket]);
 
   const onSubmit = async () => {
+    setLoading(true);
     const submitData: ISubmitData<AuthLoginInput> = await loginFormRef.current?.onValidateForm();
 
     if (!submitData) return;
 
-    await submitLoginMutate({
-      variables: {
-        user: {
-          email: submitData.email && submitData.email.trim(),
-          password: submitData.password,
-        },
-      },
-    });
+    const user = await signin(submitData.email && submitData.email.trim(), submitData.password);
+    setLoading(false);
+    if (user) {
+      if (qs.redirect) {
+        props.history.push(`${qs.redirect}`);
+      } else {
+        props.history.push(LOGIN_REDIRECT_URL);
+      }
+    }
+    // await submitLoginMutate({
+    //   variables: {
+    //     user: {
+    //       email: submitData.email && submitData.email.trim(),
+    //       password: submitData.password,
+    //     },
+    //   },
+    // });
   };
 
   const onBack = () => {
@@ -151,7 +164,7 @@ export default (props: IPage) => {
                 <Row className={style['button-row']}>
                   <Button
                     className={style['button-login']}
-                    loading={submitLoginMutation.loading}
+                    loading={loading}
                     size="large"
                     type="primary"
                     htmlType="submit"

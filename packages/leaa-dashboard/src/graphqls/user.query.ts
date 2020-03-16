@@ -21,6 +21,20 @@ export const GET_USERS = gql`
   }
 `;
 
+export const HASURA_GET_USER = gql`
+  query($id: String!) {
+    user_by_pk(id: $id) {
+      id
+      name
+      email
+      avatar_url
+      created_at
+      updated_at
+      is_admin
+    }
+  }
+`;
+
 export const GET_USER = gql`
   query($id: Int!) {
     user(id: $id) {

@@ -1,8 +1,12 @@
 import React, { useState, useEffect, useContext, createContext } from 'react';
 import * as firebase from 'firebase/app';
 import 'firebase/auth';
+import { apolloClient } from '@leaa/dashboard/src/libs/apollo-client.lib';
+import { HASURA_GET_USER } from '@leaa/dashboard/src/graphqls/user.query';
+import { IAuthInfo } from '@leaa/dashboard/src/interfaces';
 import config from '../../config';
 import { authUtil } from '../utils/auth.util';
+
 // Add your Firebase credentials
 if (firebase.apps.length === 0) {
   firebase.initializeApp(config);
@@ -16,9 +20,22 @@ export const useAuth = () => {
   return useContext(authContext);
 };
 
+const getUser = id =>
+  apolloClient
+    .query<any>({
+      query: HASURA_GET_USER,
+      variables: { id },
+      fetchPolicy: 'network-only',
+    })
+    .then(({ data }) => {
+      return data;
+    });
+
 // Provider hook that creates auth object and handles state
 function useProvideAuth() {
   const [user, setUser] = useState(null);
+
+  const [userInfo, setUserInfo] = useState<IAuthInfo>(authUtil.getAuthInfo());
   // Wrap any Firebase methods we want to use making sure ...
   // ... to save the user to state.
   const signin = (email, password) => {
@@ -77,22 +94,28 @@ function useProvideAuth() {
       let token = '';
       let idTokenResult = null;
       if (firebaseUser) {
-        token = await firebaseUser.getIdToken(true);
-        idTokenResult = await firebaseUser.getIdTokenResult();
-        const hasuraClaim = idTokenResult.claims['https://hasura.io/jwt/claims'];
-        if (hasuraClaim) {
-          setUser(firebaseUser);
-          authUtil.setAuthToken(token);
-        } else {
-          const metadataRef = firebase.database().ref(`metadata/${firebaseUser.uid}/refreshTime`);
-          metadataRef.on('value', async data => {
-            // if (!data.exists) return;
-            // Force refresh to pick up the latest custom claims changes.
-            token = await firebaseUser.getIdToken(true);
-            idTokenResult = await firebaseUser.getIdTokenResult();
-            authUtil.setAuthToken(token);
+        try {
+          token = await firebaseUser.getIdToken(true);
+          idTokenResult = await firebaseUser.getIdTokenResult();
+          const hasuraClaim = idTokenResult.claims['https://hasura.io/jwt/claims'];
+          if (hasuraClaim) {
             setUser(firebaseUser);
-          });
+            authUtil.setAuthToken(token);
+          } else {
+            const metadataRef = firebase.database().ref(`metadata/${firebaseUser.uid}/refreshTime`);
+            metadataRef.on('value', async data => {
+              // if (!data.exists) return;
+              // Force refresh to pick up the latest custom claims changes.
+              token = await firebaseUser.getIdToken(true);
+              idTokenResult = await firebaseUser.getIdTokenResult();
+              authUtil.setAuthToken(token);
+              setUser(firebaseUser);
+            });
+          }
+          const fetchUserInfo = await getUser(firebaseUser.uid);
+          setUserInfo(fetchUserInfo);
+        } catch (err) {
+          console.log(err);
         }
       } else {
         setUser(false);
@@ -102,6 +125,12 @@ function useProvideAuth() {
     // Cleanup subscription on unmount
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (userInfo) {
+      authUtil.setAuthInfo(userInfo);
+    }
+  }, [userInfo]);
 
   // Return the user object and auth methods
   return {
