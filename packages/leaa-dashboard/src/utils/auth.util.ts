@@ -4,10 +4,10 @@ import { IAuthInfo } from '@leaa/dashboard/src/interfaces';
 
 const setAuthToken = (token: string, expiresIn: number) => {
   // sync API tims format
-  const expiresInTime = `${Math.floor(Date.now() / 1000) + expiresIn}`;
+  // const expiresInTime = `${Math.floor(Date.now() / 1000) + expiresIn}`;
 
   localStorage.setItem(AUTH_TOKEN_NAME, token);
-  localStorage.setItem(AUTH_EXPIRES_IN_NAME, expiresInTime);
+  // localStorage.setItem(AUTH_EXPIRES_IN_NAME, expiresInTime);
 };
 
 const getAuthToken = (options = { onlyToken: false }): string | null => {

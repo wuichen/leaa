@@ -2,6 +2,20 @@ import gql from 'graphql-tag';
 
 import { CATEGORY_CHILD_FRAGMENT } from './category.fragment';
 
+export const HASURA_GET_CATEGORIES = gql`
+  query queryCategories($limit: Int!, $offset: Int!, $order_by: [product_order_by!], $where: product_bool_exp) {
+    category(limit: $limit, offset: $offset, order_by: $order_by, where: $where) {
+      id
+      name
+    }
+    category_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
+
 export const GET_CATEGORIES = gql`
   query(
     $page: Int

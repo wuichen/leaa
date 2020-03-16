@@ -11,7 +11,7 @@ export const authRoutes: IRouteItem[] = [
     namei18n: '_route:login',
     permission: ALLOW_PERMISSION,
     path: '/login',
-    LazyComponent: React.lazy(() => import(/* webpackChunkName: 'Login' */ '../pages/Auth/Login/Login')),
+    LazyComponent: React.lazy(() => import(/* webpackChunkName: 'Login' */ '../pages/Auth/Login/HasuraLogin')),
     exact: true,
   },
 ];

@@ -17,6 +17,7 @@ import { RefreshSetting } from '@leaa/dashboard/src/components/RefreshSetting/Re
 import { masterRoute, authRoute, otherRoute, testWithoutLayoutRoute } from '@leaa/dashboard/src/routes';
 import { initStore, StoreProvider } from '@leaa/dashboard/src/stores';
 import i18n from '@leaa/dashboard/src/i18n';
+import { ProvideAuth } from '@leaa/dashboard/src/libs/use-auth';
 
 const store = initStore();
 
@@ -37,7 +38,8 @@ export const App = (): JSX.Element => {
           <ApolloProvider client={apolloClient}>
             <StoreProvider value={store}>
               <I18nextProvider i18n={i18n}>
-                <RefreshSetting>
+                <ProvideAuth>
+                  {/* TODO: add back  <RefreshSetting> */}
                   <RefreshflatPermissions history={history}>
                     <Router history={history}>
                       <Switch>
@@ -48,7 +50,8 @@ export const App = (): JSX.Element => {
                       </Switch>
                     </Router>
                   </RefreshflatPermissions>
-                </RefreshSetting>
+                  {/* </RefreshSetting> */}
+                </ProvideAuth>
               </I18nextProvider>
             </StoreProvider>
           </ApolloProvider>

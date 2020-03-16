@@ -3,7 +3,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "outDir": "_dist",
-    "allowJs": false,
+    "allowJs": true,
     "jsx": "react",
     "target": "es6",
     "module": "commonjs",
@@ -11,6 +11,7 @@
     "sourceMap": false,
     "experimentalDecorators": true,
     "skipLibCheck": true,
+    "noImplicitAny": false,
     "lib": ["dom", "esnext"],
     "paths": {
       "@leaa/common/*": ["../_leaa-common/*"],

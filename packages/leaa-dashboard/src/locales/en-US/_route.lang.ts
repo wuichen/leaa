@@ -104,4 +104,7 @@ export default {
   editZan: `${_lang.edit} ${zan}`,
   //
   auth,
+
+  // Hasura Paths
+  hasuraProduct: `Hasura ${product}`,
 };

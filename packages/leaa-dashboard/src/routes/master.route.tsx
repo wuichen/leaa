@@ -134,6 +134,18 @@ export const masterRoutes: IRouteItem[] = [
         canCreate: true,
         exact: true,
       },
+      {
+        name: 'Product',
+        namei18n: '_route:hasuraProduct',
+        permission: 'product.list-read',
+        path: '/hasura-products',
+        icon: 'ri-shirt-line',
+        LazyComponent: React.lazy(() =>
+          import(/* webpackChunkName: 'ProductList' */ '../pages/HasuraProduct/ProductList/ProductList'),
+        ),
+        canCreate: true,
+        exact: true,
+      },
     ],
   },
   // -------- [User Group] --------

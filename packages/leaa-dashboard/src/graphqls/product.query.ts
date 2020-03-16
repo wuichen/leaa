@@ -1,5 +1,18 @@
 import gql from 'graphql-tag';
 
+export const HASURA_GET_PRODUCTS = gql`
+  query queryProducts($limit: Int!, $offset: Int!, $order_by: [product_order_by!], $where: product_bool_exp) {
+    product(limit: $limit, offset: $offset, order_by: $order_by, where: $where) {
+      id
+      name
+    }
+    product_aggregate {
+      aggregate {
+        count
+      }
+    }
+  }
+`;
 export const GET_PRODUCTS = gql`
   query(
     $page: Int
