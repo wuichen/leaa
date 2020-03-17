@@ -59,15 +59,15 @@ class CustomApp extends App<IProps, IState> {
     const appProps = await App.getInitialProps(appContext);
 
     // get setting for global
-    const getSettingsQuery = await apolloClient.query<{ settings: SettingsWithPaginationObject }>({
-      query: GET_SETTINGS_FOR_WWW,
-    });
+    // const getSettingsQuery = await apolloClient.query<{ settings: SettingsWithPaginationObject }>({
+    //   query: GET_SETTINGS_FOR_WWW,
+    // });
 
-    const storeState = { setting: { globalSettings: getSettingsQuery.data.settings.items } };
+    // const storeState = { setting: { globalSettings: getSettingsQuery.data.settings.items } };
 
     return {
       ...appProps,
-      storeState,
+      storeState: null,
     };
   }
 

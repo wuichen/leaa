@@ -1,0 +1,6 @@
+{
+  "projects": {
+    "staging": "safepoint-d221c",
+    "default": "safepoint-d221c"
+  }
+}
